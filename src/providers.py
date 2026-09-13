@@ -1,6 +1,8 @@
 """
 🔌 MULTI-PROVIDER LLM ADAPTER (Google Gemini, OpenAI & Offline Mock)
 Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi trường LLM_PROVIDER.
+Chủ đề: Trợ lý Tư vấn Sức khỏe Vinmec — Tra cứu lịch làm việc bác sĩ chuyên khoa
+        và đặt lịch khám bệnh.
 """
 
 import os
@@ -17,6 +19,7 @@ if sys.stdout.encoding != 'utf-8':
 
 load_dotenv()
 
+
 class BaseLLMProvider:
     """Interface cơ sở cho các LLM Provider hỗ trợ Native Tool Calling"""
     def generate(self, prompt: str, system_prompt: str = "") -> str:
@@ -32,31 +35,65 @@ class MockOfflineProvider(BaseLLMProvider):
         self.model_name = "Offline-Mock-Model-2026"
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
-        return f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. (Chế độ Chatbot không có Tool tra cứu dữ liệu thời gian thực)."
+        prompt_lower = prompt.lower()
+
+        if any(k in prompt_lower for k in ["chẩn đoán", "kê đơn", "tôi bị bệnh gì"]):
+            return ("[Mock Chatbot Response]: Tôi không thể chẩn đoán bệnh qua chatbot. Bạn nên đặt lịch khám "
+                    "trực tiếp với bác sĩ chuyên khoa phù hợp để được thăm khám và tư vấn chính xác.")
+        if any(k in prompt_lower for k in ["lịch làm việc", "lịch khám", "tra cứu", "bác sĩ nào",
+                                            "đặt lịch", "đặt khám", "book"]):
+            return ("[Mock Chatbot Response]: Xin lỗi, tôi không có khả năng truy cập dữ liệu lịch làm việc "
+                    "bác sĩ hay hệ thống đặt lịch thời gian thực. (Chế độ Chatbot không có Tool tra cứu dữ liệu "
+                    "thời gian thực). Bạn vui lòng gọi tổng đài Vinmec hoặc dùng hệ thống đặt lịch trực tuyến.")
+        return (f"[Mock Chatbot Response]: Xin chào! Tôi đã nhận được câu hỏi '{prompt}'. Hệ thống Bệnh viện "
+                f"Vinmec làm việc từ 07:30 đến 17:00 các ngày trong tuần. (Chế độ Chatbot không có Tool tra cứu "
+                f"dữ liệu thời gian thực).")
 
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
-        
+
+        specialty_map = {"tim mạch": "Tim mạch", "nhi khoa": "Nhi khoa", "da liễu": "Da liễu"}
+
         # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        if any(k in prompt_lower for k in ["đặt lịch", "đặt khám", "book"]) and \
+           any(k in prompt_lower for k in ["bs.", "bác sĩ", "khám"]):
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "book_appointment",
+                "arguments": {
+                    "patient_name": "Nguyễn Văn An",
+                    "doctor_name": "BS. Trần Văn Khỏe",
+                    "datetime_str": "08:00 15/09/2026",
+                    "phone_number": "0987654321"
+                },
+                "thought": "Người dùng yêu cầu đặt lịch khám bệnh. Tôi sẽ gọi tool book_appointment."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif any(k in prompt_lower for k in ["lịch làm việc", "lịch khám", "tra cứu", "bác sĩ nào"]):
+            specialty = "Tim mạch"
+            for keyword, canonical in specialty_map.items():
+                if keyword in prompt_lower:
+                    specialty = canonical
+                    break
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "doctor_schedule_query",
+                "arguments": {"specialty": specialty},
+                "thought": f"Người dùng muốn tra cứu lịch bác sĩ chuyên khoa '{specialty}'. Tôi sẽ gọi tool doctor_schedule_query."
+            }
+        elif any(k in prompt_lower for k in ["chẩn đoán", "kê đơn", "tôi bị bệnh gì"]):
+            return {
+                "type": "text",
+                "content": ("Tôi không thể chẩn đoán bệnh qua chatbot. Bạn nên đặt lịch khám trực tiếp với "
+                            "bác sĩ chuyên khoa phù hợp để được thăm khám và tư vấn chính xác."),
+                "thought": "Đây là yêu cầu chẩn đoán y khoa, nằm ngoài phạm vi Tool hiện có."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": ("[Mock Agent Response]: Xin chào! Hệ thống Bệnh viện Vinmec làm việc từ 07:30 đến "
+                            "17:00 các ngày trong tuần. Bạn cần tôi tra cứu lịch bác sĩ chuyên khoa nào hoặc "
+                            "hỗ trợ đặt lịch khám không?"),
+                "thought": "Câu hỏi chung, trả lời trực tiếp không cần gọi Tool."
             }
 
 
@@ -64,7 +101,7 @@ class GeminiProvider(BaseLLMProvider):
     """Google Gemini Provider (Native Tool Calling với Google GenAI SDK)"""
     def __init__(self, api_key: str = None, model: str = None):
         self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        self.model_name = model or os.getenv("LLM_MODEL") or "gemini-2.5-flash"
+        self.model_name = model or os.getenv("LLM_MODEL") or "gemini-3.6-flash"
 
     def generate(self, prompt: str, system_prompt: str = "") -> str:
         if not self.api_key or self.api_key == "your_gemini_api_key_here":
@@ -82,13 +119,13 @@ class GeminiProvider(BaseLLMProvider):
         if not self.api_key or self.api_key == "your_gemini_api_key_here":
             print("ℹ️ [Gemini Provider]: Chưa tìm thấy GEMINI_API_KEY hợp lệ. Tự động chuyển sang Mock Offline.")
             return MockOfflineProvider().generate_with_tools(prompt, tools_schema, system_prompt)
-        
+
         try:
             from google import genai
             from google.genai import types
 
             client = genai.Client(api_key=self.api_key)
-            
+
             # Chuẩn hóa function declarations cho Gemini SDK
             function_declarations = []
             for tool in tools_schema:
@@ -214,7 +251,7 @@ class OpenAIProvider(BaseLLMProvider):
 def get_llm_provider() -> BaseLLMProvider:
     """Factory function khởi tạo Provider theo LLM_PROVIDER env variable"""
     provider_type = os.getenv("LLM_PROVIDER", "gemini").lower()
-    
+
     if provider_type == "gemini":
         key = os.getenv("GEMINI_API_KEY")
         if key and key != "your_gemini_api_key_here":

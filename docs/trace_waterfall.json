@@ -1,29 +1,81 @@
 [
   {
     "step": 1,
-    "query": "Chào bạn, bạn có thể giới thiệu quy chế học vụ cơ bản của Đại học VinUni không?",
+    "query": "Chào bạn, giờ làm việc của bệnh viện Vinmec thường bắt đầu và kết thúc lúc mấy giờ vậy?",
     "action_type": "FINAL_ANSWER",
-    "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool.",
-    "output": "[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-    "latency_ms": 2845.93
+    "thought": "Gemini phản hồi trực tiếp bằng văn bản (không cần gọi công cụ).",
+    "output": "Chào bạn, cảm ơn bạn đã quan tâm đến dịch vụ tại Vinmec.\n\nThông thường, giờ làm việc tại hệ thống Bệnh viện Đa khoa Quốc tế Vinmec như sau:\n\n*   **Khám ngoại trú:** Từ 08:00 đến 17:00, từ Thứ Hai đến Thứ Sáu. Một số chuyên khoa có thể làm việc vào sáng Thứ Bảy.\n*   **Cấp cứu:** Hoạt động 24/7 để sẵn sàng tiếp nhận bệnh nhân.\n\nTuy nhiên, lịch làm việc cụ thể có thể thay đổi tùy theo từng cơ sở bệnh viện và chuyên khoa. Để có thông tin chính xác nhất cho nhu cầu khám bệnh của mình, bạn có thể cho tôi biết bạn đang quan tâm đến chuyên khoa nào hoặc cơ sở Vinmec nào không? Tôi sẽ hỗ trợ bạn tra cứu lịch làm việc chi tiết của các bác sĩ tại đó.",
+    "latency_ms": 4446.76
   },
   {
     "step": 1,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Cho tôi xem lịch làm việc của các bác sĩ chuyên khoa Tim mạch tuần này.",
     "action_type": "TOOL_EXECUTION",
-    "tool_name": "academic_query",
+    "tool_name": "doctor_schedule_query",
     "arguments": {
-      "student_id": "SV2026001"
+      "specialty": "Tim mạch"
     },
-    "observation": {},
-    "latency_ms": 799.12
+    "observation": {
+      "status": "SUCCESS",
+      "specialty": "Tim mạch",
+      "doctors": [
+        {
+          "doctor_name": "BS. Trần Văn Khỏe",
+          "room": "P.302 - Tòa A",
+          "available_slots": [
+            "08:00 15/09/2026",
+            "09:30 15/09/2026",
+            "14:00 16/09/2026"
+          ]
+        },
+        {
+          "doctor_name": "TS.BS Lê Thị Hòa",
+          "room": "P.305 - Tòa A",
+          "available_slots": [
+            "10:00 15/09/2026",
+            "15:00 17/09/2026"
+          ]
+        }
+      ]
+    },
+    "latency_ms": 1597.21
   },
   {
     "step": 2,
-    "query": "Hãy tra cứu thông tin học vụ của sinh viên SV2026001.",
+    "query": "Cho tôi xem lịch làm việc của các bác sĩ chuyên khoa Tim mạch tuần này.",
     "action_type": "FINAL_ANSWER",
     "thought": "Tổng hợp kết quả từ MCP Server thành công.",
-    "output": "Chưa thể trả lời chi tiết do chưa nhận được dữ liệu từ MCP Server (hãy hoàn thành TODO 2.1).",
+    "output": "Đã hoàn tất xử lý qua MCP Server: {\"status\": \"SUCCESS\", \"specialty\": \"Tim mạch\", \"doctors\": [{\"doctor_name\": \"BS. Trần Văn Khỏe\", \"room\": \"P.302 - Tòa A\", \"available_slots\": [\"08:00 15/09/2026\", \"09:30 15/09/2026\", \"14:00 16/09/2026\"]}, {\"doctor_name\": \"TS.BS Lê Thị Hòa\", \"room\": \"P.305 - Tòa A\", \"available_slots\": [\"10:00 15/09/2026\", \"15:00 17/09/2026\"]}]}",
+    "latency_ms": 10.0
+  },
+  {
+    "step": 1,
+    "query": "Tôi tên Nguyễn Văn An, số điện thoại 0987654321, muốn đặt lịch khám với BS. Trần Văn Khỏe vào lúc 08:00 ngày 15/09/2026.",
+    "action_type": "TOOL_EXECUTION",
+    "tool_name": "book_appointment",
+    "arguments": {
+      "doctor_name": "BS. Trần Văn Khỏe",
+      "phone_number": "0987654321",
+      "patient_name": "Nguyễn Văn An",
+      "datetime_str": "08:00 15/09/2026"
+    },
+    "observation": {
+      "status": "SUCCESS",
+      "booking_id": "VMC-4321-319",
+      "patient_name": "Nguyễn Văn An",
+      "doctor_name": "BS. Trần Văn Khỏe",
+      "datetime": "08:00 15/09/2026",
+      "phone_number": "0987654321",
+      "message": "Đặt lịch khám thành công cho bệnh nhân Nguyễn Văn An với BS. Trần Văn Khỏe vào lúc 08:00 15/09/2026. Vinmec sẽ liên hệ xác nhận qua số 0987654321."
+    },
+    "latency_ms": 1711.52
+  },
+  {
+    "step": 2,
+    "query": "Tôi tên Nguyễn Văn An, số điện thoại 0987654321, muốn đặt lịch khám với BS. Trần Văn Khỏe vào lúc 08:00 ngày 15/09/2026.",
+    "action_type": "FINAL_ANSWER",
+    "thought": "Tổng hợp kết quả từ MCP Server thành công.",
+    "output": "Đặt lịch khám thành công cho bệnh nhân Nguyễn Văn An với BS. Trần Văn Khỏe vào lúc 08:00 15/09/2026. Vinmec sẽ liên hệ xác nhận qua số 0987654321.",
     "latency_ms": 10.0
   }
 ]

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vinmec Agent Lab — Chatbot vs ReAct Agent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__brand">
+    <span class="topbar__mark">VM</span>
+    <div>
+      <h1 class="topbar__title">Vinmec Agent Lab</h1>
+      <p class="topbar__subtitle">Chatbot Baseline vs ReAct Agent · MCP Server</p>
+    </div>
+  </div>
+
+  <div class="topbar__controls">
+    <label class="provider-select">
+      <span>Provider</span>
+      <select id="providerSelect">
+        <option value="mock">Mock Offline</option>
+        <option value="gemini">Gemini</option>
+        <option value="openai">OpenAI</option>
+      </select>
+    </label>
+    <span id="statusDot" class="status-dot" title="Trạng thái server"></span>
+    <button id="themeToggle" class="icon-btn" title="Đổi giao diện sáng/tối">◐</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <section class="query-bar">
+    <input id="queryInput" type="text" placeholder="Nhập câu hỏi, ví dụ: Cho tôi xem lịch bác sĩ Tim mạch..." />
+    <button id="runBtn" class="btn btn--primary">Chạy so sánh</button>
+    <div id="examples" class="examples"></div>
+  </section>
+
+  <section class="compare">
+    <div class="col col--chatbot">
+      <div class="col__head">
+        <span class="col__badge col__badge--muted">Chatbot Baseline</span>
+        <span class="col__hint">Không có quyền truy cập dữ liệu thời gian thực</span>
+      </div>
+      <div id="chatbotOutput" class="col__body">
+        <p class="empty-state">Chưa có câu hỏi nào được gửi.</p>
+      </div>
+    </div>
+
+    <div class="col col--agent">
+      <div class="col__head">
+        <span class="col__badge col__badge--active">ReAct Agent</span>
+        <span class="col__hint">Thought → Action → Observation → Final Answer</span>
+      </div>
+      <div id="agentOutput" class="col__body">
+        <p class="empty-state">Chưa có câu hỏi nào được gửi.</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="tabs">
+    <button class="tab is-active" data-tab="tools">MCP Tools</button>
+    <button class="tab" data-tab="tests">Test Suite</button>
+    <button class="tab" data-tab="waterfall">Trace Waterfall</button>
+  </nav>
+
+  <section id="panel-tools" class="panel is-active">
+    <div id="toolsList" class="tools-list"></div>
+  </section>
+
+  <section id="panel-tests" class="panel">
+    <table class="tests-table">
+      <thead>
+        <tr><th>ID</th><th>Loại</th><th>Độ phức tạp</th><th>Câu hỏi</th><th>Trạng thái</th><th></th></tr>
+      </thead>
+      <tbody id="testsBody"></tbody>
+    </table>
+    <button id="runAllBtn" class="btn btn--ghost">Chạy toàn bộ test suite</button>
+  </section>
+
+  <section id="panel-waterfall" class="panel">
+    <div id="waterfallChart" class="waterfall"></div>
+  </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
