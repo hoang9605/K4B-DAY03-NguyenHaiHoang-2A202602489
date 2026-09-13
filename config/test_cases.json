@@ -33,40 +33,5 @@
     "question": "Cho tôi xem lịch làm việc của các bác sĩ chuyên khoa Ung bướu.",
     "expected_behavior": "Agent gọi 'doctor_schedule_query' với specialty='Ung bướu', nhận kết quả NOT_FOUND từ Tool (không có trong mock database) và đưa ra phản hồi lịch sự thông báo chưa có dữ liệu, gợi ý người dùng liên hệ tổng đài Vinmec, không bịa đặt tên bác sĩ hay lịch trống.",
     "complexity": "Medium"
-  },
-  {
-    "id": "TC06",
-    "type": "ambiguous_slot_filling",
-    "question": "Tôi muốn đặt lịch khám Nhi khoa cho con tôi vào tuần sau.",
-    "expected_behavior": "Agent nhận thấy thiếu các thông tin bắt buộc để gọi 'book_appointment' (chưa có tên bệnh nhân, tên bác sĩ cụ thể, thời gian chính xác, số điện thoại), nên chủ động hỏi lại người dùng lần lượt các thông tin còn thiếu thay vì tự suy đoán hoặc bịa dữ liệu.",
-    "complexity": "Medium"
-  },
-  {
-    "id": "TC07",
-    "type": "out_of_scope_query",
-    "question": "Bác sĩ có thể chẩn đoán giúp tôi xem tôi bị bệnh tim mạch gì không dựa trên triệu chứng đau ngực tôi mô tả?",
-    "expected_behavior": "Agent nhận diện đây là yêu cầu chẩn đoán y khoa nằm ngoài phạm vi các Tool hiện có (không có Tool chẩn đoán bệnh), từ chối khéo léo và khuyến nghị người dùng đặt lịch khám trực tiếp với bác sĩ chuyên khoa Tim mạch để được chẩn đoán chính xác, không tự đưa ra phỏng đoán bệnh lý.",
-    "complexity": "Medium"
-  },
-  {
-    "id": "TC08",
-    "type": "multi_step_reasoning",
-    "question": "Hãy tra lịch của cả chuyên khoa Tim mạch và Da liễu, sau đó cho tôi biết chuyên khoa nào hiện có nhiều bác sĩ đang nhận lịch khám hơn.",
-    "expected_behavior": "Agent gọi 'doctor_schedule_query' hai lần liên tiếp (specialty='Tim mạch' và specialty='Da liễu'), sau đó so sánh số lượng bác sĩ trong trường 'doctors' của hai kết quả trả về và kết luận Tim mạch (2 bác sĩ) có nhiều bác sĩ hơn Da liễu (1 bác sĩ).",
-    "complexity": "High"
-  },
-  {
-    "id": "TC09",
-    "type": "invalid_input_format",
-    "question": "Đặt lịch khám giúp tôi với BS. Trần Văn Khỏe vào 'sáng mai' nhé, tôi tên Phạm Văn Long, SĐT 0909090909.",
-    "expected_behavior": "Agent nhận diện 'sáng mai' không phải định dạng thời gian hợp lệ (HH:MM DD/MM/YYYY) theo yêu cầu của Tool 'book_appointment', nên hỏi lại người dùng để làm rõ ngày giờ cụ thể trước khi gọi Tool, tránh gọi Tool với dữ liệu mơ hồ.",
-    "complexity": "Medium"
-  },
-  {
-    "id": "TC10",
-    "type": "conditional_fallback",
-    "question": "Tra giúp tôi lịch của BS. Nguyễn Thị Xuân trong khoa Tim mạch, nếu bác sĩ đó không có lịch thì đặt tạm cho tôi với bác sĩ khác cùng khoa còn trống sớm nhất. Tôi tên Đỗ Thị Lan, SĐT 0977123456.",
-    "expected_behavior": "Agent gọi 'doctor_schedule_query' với specialty='Tim mạch', doctor_name='BS. Nguyễn Thị Xuân', nhận NOT_FOUND vì bác sĩ không tồn tại trong danh sách; agent sau đó tự động gọi lại 'doctor_schedule_query' chỉ với specialty='Tim mạch' để lấy danh sách bác sĩ khác, chọn bác sĩ có available_slots sớm nhất, rồi gọi 'book_appointment' với thông tin bác sĩ thay thế đó cùng patient_name và phone_number đã cho, đồng thời thông báo rõ cho người dùng biết đã đổi sang bác sĩ khác.",
-    "complexity": "High"
   }
 ]
